@@ -201,6 +201,6 @@ function updateP2(xp, yp){
 	var dy = yp-y;
 	values[2].text(xp);
 	values[3].text(yp);
-	values[4].text("${("+xp+"-"+x+")/"+x+"}\\over{("+yp+"-"+y+")/"+y+"}="+((dx/x)/(dy/y)).toFixed(4)+"$");
+	values[4].text("${{("+xp+"-"+x+")/"+x+"}\\over{("+yp+"-"+y+")/"+y+"}}="+((dx/x)/(dy/y)).toFixed(4)+"$");
         MathJax.Hub.Queue(["Typeset",MathJax.Hub, elasticity]);
 }
