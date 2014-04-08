@@ -87,10 +87,11 @@ var initLine = function(){
 var selectedPoints = [];
 
 var initPoints = function(){
-	
+	var points = [];
 	for(var i=0; i<=segments; i++){
 		var initPoint = function(){
 			
+		        var k = i;
 			var p = i/segments;
 			var px = p*line.x1 + (1-p)*line.x2;
 			var py = p*line.y1 + (1-p)*line.y2;
@@ -108,13 +109,19 @@ var initPoints = function(){
 				}
 			}
 			
+		        function flip(){selected = !selected;}
+
 			function mousedown(){
 				var point = d3.select(this);
 				if(!selected){
 					if(selectedPoints.length >= 2){
-						return;
+					        for(var j=0; j<selectedPoints.length; j++){
+						    points[selectedPoints[j][2]].style('fill', 'blue').flip();
+						}
+						selectedPoints.splice(0,2);
+					        clear();
 					}
-					selectedPoints.push([px,py]);
+					selectedPoints.push([px,py, k]);
 					if(selectedPoints.length == 1){
 						updateP1(px,py);
 					}else if(selectedPoints.length == 2){
@@ -123,11 +130,10 @@ var initPoints = function(){
 					point.style('fill', 'red');
 					selected = true;
 				}else{
-					console.log('removing' + px + py);
 					var index = -1;
-					for(var i=0; i<selectedPoints.length; i++){
-						if(selectedPoints[i][0] == px){
-							index = i;
+					for(var j=0; j<selectedPoints.length; j++){
+						if(selectedPoints[j][0] == px){
+							index = j;
 							break;
 						}
 					}
@@ -141,7 +147,7 @@ var initPoints = function(){
 				}
 			}
 			
-			svg.append('circle')
+			var point = svg.append('circle')
 				.style('fill', 'blue')
 				.attr('r', 5)
 				.attr('cx', x(px))
@@ -149,17 +155,25 @@ var initPoints = function(){
 				.on('mouseover', mouseover)
 				.on('mouseout', mouseout)
 				.on('mousedown', mousedown);
+		        point.flip = flip;
+		        return point;
 		}();
+	    points.push(initPoint);
 	}
 }();
 
 var initTable = function(){
-	var names = ["x","y","x'","y'","dx","dy","elasticity"];
+	var names = ["$Q_1$",
+		     "$P_1$",
+		     "$Q_2$",
+		     "$P_2$",
+		     "$E_d=\\left | {\\% \\Delta Q_d}\\over{\\%\\Delta P} \\right |$"
+		    ];
 	var nameRow = table.append('tr');
 	var valueRow = table.append('tr');
 	for(var i=0;i<names.length;i++){
 		nameRow.append('td')
-			.text(names[i]);
+			.html(names[i]);
 		values.push(valueRow.append('td')
 			.text('NaN'));			
 	}
@@ -171,14 +185,14 @@ function clear(){
 	values[2].text(NaN);
 	values[3].text(NaN);
 	values[4].text(NaN);
-	values[5].text(NaN);
-	values[6].text(NaN);
 }
 
 function updateP1(x, y){
 	values[0].text(x);
 	values[1].text(y);
 }
+
+var elasticity = values[4][0][0];
 
 function updateP2(xp, yp){
 	var x = +values[0].text();
@@ -187,7 +201,6 @@ function updateP2(xp, yp){
 	var dy = yp-y;
 	values[2].text(xp);
 	values[3].text(yp);
-	values[4].text(dx);
-	values[5].text(dy);
-	values[6].text(((dx/x)/(dy/y)).toFixed(4));
+	values[4].text("${("+xp+"-"+x+")/"+x+"}\\over{("+yp+"-"+y+")/"+y+"}="+((dx/x)/(dy/y)).toFixed(4)+"$");
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub, elasticity]);
 }
