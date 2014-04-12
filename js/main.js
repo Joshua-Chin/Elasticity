@@ -1,7 +1,7 @@
 var margin = {top: 40, left: 40, right: 40, bottom: 40};
 
-var width = 600;
-var height = 480;
+var width = 480;
+var height = 300;
 
 var maxPrice = 100;
 var maxQuantity = 100;
@@ -58,14 +58,14 @@ var initAxisLabel = function(){
 	    .attr("text-anchor", "end")
 	    .attr('font-family', 'sans-serif')
 	    .attr("x", width)
-	    .attr("y", height - 6)
+	    .attr("y", height + 30)
 	    .text("Quantity");
 	    
 	svg.append("text")
 	    .attr("class", "y label")
 	    .attr("text-anchor", "end")
 	    .attr('font-family', 'sans-serif')
-	    .attr("y", 6)
+	    .attr("y", -40)
 	    .attr("dy", ".75em")
 	    .attr("transform", "rotate(-90)")
 	    .text("Price");   
@@ -109,7 +109,7 @@ var initPoints = function(){
 				}
 			}
 			
-		        function flip(){selected = !selected;}
+		    function flip(){selected = !selected;}
 
 			function mousedown(){
 				var point = d3.select(this);
@@ -167,40 +167,86 @@ var initTable = function(){
 		     "$P_1$",
 		     "$Q_2$",
 		     "$P_2$",
-		     "$E_d=\\left | {\\% \\Delta Q_d}\\over{\\%\\Delta P} \\right |$"
+		     "$Slope$",
+		     "$E_d(Standard)$",
+		     "$E_d(Midarc)$"		     
 		    ];
 	var nameRow = table.append('tr');
 	var valueRow = table.append('tr');
 	for(var i=0;i<names.length;i++){
 		nameRow.append('td')
 			.html(names[i]);
-		values.push(valueRow.append('td')
-			.text('NaN'));			
+		values.push(valueRow.append('td'));
 	}
+	clear();
 }();
 
+var initArrow = function(){
+	svg.append("defs")
+	.append("marker")
+	    .attr("id", "arrow")
+	    .attr("viewBox", "-9 -6 11 12")
+	    .attr("refX", 0)
+	    .attr("refY", 0)
+	    .attr("markerWidth", 6)
+	    .attr("markerHeight", 6)
+	    .attr("orient", "auto")
+  		.append("path")
+    		.attr("d", "M -8,-5  L 3,0  L -8,5");
+}();
+
+var arrow;
+
 function clear(){
-	values[0].text(NaN);
-	values[1].text(NaN);
-	values[2].text(NaN);
-	values[3].text(NaN);
-	values[4].text(NaN);
+	if(arrow !== undefined){
+		arrow.remove();
+	}
+	values[0].text('$NaN$');
+	values[1].text('$NaN$');
+	values[2].text('$NaN$');
+	values[3].text('$NaN$');
+	values[4].text('$'+(line.x2-line.x1)/(line.y2-line.y1)+'$');
+	values[5].text('$NaN$');
+	values[6].text('$NaN$');
+	renderTable();
+	
 }
 
 function updateP1(x, y){
-	values[0].text(x);
-	values[1].text(y);
+	values[0].value = x;
+	values[1].value = y;
+	values[0].text('$'+x+'$');
+	values[1].text('$'+y+'$');
+	renderTable();
 }
 
-var elasticity = values[4][0][0];
-
 function updateP2(xp, yp){
-	var x = +values[0].text();
-	var y = +values[1].text();
-	var dx = xp-x;
-	var dy = yp-y;
-	values[2].text(xp);
-	values[3].text(yp);
-	values[4].text("${{("+xp+"-"+x+")/"+x+"}\\over{("+yp+"-"+y+")/"+y+"}}="+((dx/x)/(dy/y)).toFixed(4)+"$");
-        MathJax.Hub.Queue(["Typeset",MathJax.Hub, elasticity]);
+	var x0 = +values[0].value;
+	var y0 = +values[1].value;
+	var dx = xp-x0;
+	var dy = yp-y0;
+	var e = Math.abs(((dx/x0)/(dy/y0))).toFixed(4);
+	var e2 = Math.abs((dx/(x0+xp))/(dy/(y0+yp))).toFixed(4);
+	values[2].text('$'+xp+'$');
+	values[3].text('$'+yp+'$');
+	values[5].text("${{("+xp+"-"+x0+")/"+x0+"}\\over{("+yp+"-"+y0+")/"+y0+"}}="+e+"$");
+	values[6].text(
+		"${{(" + xp + "-" + x0 + ")"
+		+"/(" + xp + '+' + x0 + ")"
+		+"}\\over{(" + yp + "-" + y0 +")"
+		+"/(" + yp + '+' + y0 + ')'
+		+"}}="+e2+"$");
+	arrow = svg.append('line')
+		.attr('x1', x(x0))
+		.attr('y1', y(y0))
+		.attr('x2', x(xp))
+		.attr('y2', y(yp))
+		.attr('marker-end', 'url(#arrow)')
+		.style('stroke', 'red')
+		.style('stroke-width', 2);
+	renderTable();
+}
+
+function renderTable(){
+	MathJax.Hub.Queue(['Typeset',MathJax.Hub,table[0][0]]);
 }
