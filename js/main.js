@@ -1,3 +1,4 @@
+window.onload = function(){
 var margin = {top: 40, left: 40, right: 40, bottom: 40};
 
 var width = 480;
@@ -250,3 +251,4 @@ function updateP2(xp, yp){
 function renderTable(){
 	MathJax.Hub.Queue(['Typeset',MathJax.Hub,table[0][0]]);
 }
+};
