@@ -1,0 +1,30 @@
+.axis text {
+	font: 10px sans-serif;
+}
+
+.axis path, .axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+.label text {
+	font: 10px sans-serif;
+}
+
+table.fixed {
+	border: 2px black solid;
+	border-collapse: collapse;
+}
+
+table.fixed td {
+	text-align: center;
+	font-family: sans-serif;
+	font-size
+	font-size: 16px bold;
+	padding: 20px;
+	border: 1px black solid;
+	table-layout: fixed;
+	width: 50px;
+	overflow: hidden;
+}
