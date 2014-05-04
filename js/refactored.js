@@ -3,8 +3,8 @@ var config = {
 	
 	height:300, width:480,
 	margin : {top:40, bottom:40, left:40, right:40},
-	maxPrice : 100,
-	maxQuantity : 100,
+	maxPrice : 200,
+	maxQuantity : 200,
 	lineEndpoints : [{x:10,y:90}, {x:90,y:10}],
 	lineID: "LineID",
 	tableValueID: "TableID",
@@ -35,13 +35,13 @@ function makeTable(elem){
 		.data(config.tableNames)
 		.enter()
 		.append('td')
-		.text(function(d){return d;})
+		.text(function(d){return d;});
 	
 	valueRow.selectAll('td')
 		.data(new Array(config.tableNames.length))
 		.enter()
 		.append('td')
-		.text(function(d){return +d;})
+		.text(function(d){return +d;});
 	
 	clearTable(table);
 }
@@ -50,7 +50,7 @@ function clearTable(table){
 
 	var defaultValues = new Array(config.tableNames.length);
 	for(var i = 0; i<defaultValues.length; i++){
-		defaultValues[i] = "$NaN$"
+		defaultValues[i] = "$NaN$";
 	}
 	
 	defaultValues[4] = defaultSlopeEntry();
@@ -60,12 +60,12 @@ function clearTable(table){
 
 function defaultSlopeEntry(){
 
-	var x1 = config.lineEndpoints[0].x;
-	var x2 = config.lineEndpoints[1].x;
-	var y1 = config.lineEndpoints[0].y;
-	var y2 = config.lineEndpoints[1].y;
+	var x1 = config.lineEndpoints[0].x.toPrecision(2);
+	var x2 = config.lineEndpoints[1].x.toPrecision(2);
+	var y1 = config.lineEndpoints[0].y.toPrecision(2);
+	var y2 = config.lineEndpoints[1].y.toPrecision(2);
 
-	return '${' + x2 + '-' + x1 + '\\over' + y2 + '-' + y1 + '}=' + slope() + '$';
+	return '${' + x2 + '-' + x1 + '\\over' + y2 + '-' + y1 + '}=' + slope().toFixed(2) + '$';
 }
 
 function updateTable(values){
@@ -73,7 +73,7 @@ function updateTable(values){
 	d3.select("#"+config.tableValueID)
 		.selectAll("td")
 		.data(values)
-		.text(function(d){return d;})
+		.text(function(d){return d;});
 		
 	renderTable(d3.select("#"+config.tableValueID));
 		
@@ -122,7 +122,7 @@ function computeTableValues(svg, scales, table){
 	]);
 	
 	function d(expr){
-		return '$'+expr+'$';
+		return '$'+expr.toPrecision(2)+'$';
 	}
 	
 }
@@ -132,7 +132,12 @@ function elasticityPoint(x0, y0, x1, y1){
 	var dx = x1-x0;
 	var dy = y1-y0;
 
-	var e = Math.abs(((dx/x0)/(dy/y0))).toFixed(4);
+	var e = Math.abs(((dx/x0)/(dy/y0))).toPrecision(4);
+	
+	x0 = x0.toPrecision(2);
+	x1 = x1.toPrecision(2);
+	y0 = y0.toPrecision(2);
+	y1 = y1.toPrecision(2);
 	
 	return "$ \\left | {{("+x1+"-"+x0+")/"+x0+"}\\over{("+y1+"-"+y0+")/"+y0+"}} \\right | ="+e+"$";
 	
@@ -143,7 +148,13 @@ function elasticityMidarc(x0, y0, x1, y1){
 	var dx = x1-x0;
 	var dy = y1-y0;
 
-	var e = Math.abs((dx/(x0+x1))/(dy/(y0+y1))).toFixed(4);
+	var e = Math.abs((dx/(x0+x1))/(dy/(y0+y1))).toPrecision(4);
+	
+	x0 = x0.toPrecision(2);
+	x1 = x1.toPrecision(2);
+	y0 = y0.toPrecision(2);
+	y1 = y1.toPrecision(2);
+	
 	return 	"$ \\left| {{(" + x1 + "-" + x0 + ")"
 		+"/(" + x1 + '+' + x0 + ")"
 		+"/2}\\over{(" + y1 + "-" + y0 +")"
@@ -165,7 +176,36 @@ function slope(){
 	return (x2 - x1) / (y2 - y1);
 }
 
+function makeSlider(elem){
+	
+	var div = elem
+		.append('div')
+		.attr('id', 'slider_div');
+		
+	div
+		.append('label')
+		.attr('for', 'slider')
+		.text('Slope [0.5 to 2.0]');
+		
+	div
+		.append('input')
+		.on('change', function(){
+			console.log(this.value);
+			var value = -(this.value);
+			setSlope(value);
+			redrawLine();
+		})
+		.attr('id', 'slider')
+		.attr('type', 'range')
+		.attr('min', '0.5')
+		.attr('max', '2.0')
+		.attr('step', '0.25')
+		.attr('value', '1')
+		.style('width', config.width);
 
+	return div;
+	
+}
 
 function makeSVG(elem){
 	return elem
@@ -273,9 +313,10 @@ function makeLine(elem, scales){
 
 function makeLineLabel(svg, line){
 
-	svg.append('text')
+	return svg.append('text')
 		.style('text-anchor', 'middle')
 		.style('font-family', config.font)
+		.attr('id', 'line_label')
 		.attr('dy', -12)
 		.append('svg:textPath')
 			.attr({"xlink:href": "#"+line.attr("id")})
@@ -298,16 +339,16 @@ function makePoints(svg, scales, table){
 		var p = i/(config.points-1);
 		var px = p*x1 + (1-p)*x2;
 		var py = p*y1 + (1-p)*y2;
-		makePoint(points, {x:px, y:py}, scales, table);
+		makePoint(points, {x:px, y:py}, scales, table, i);
 	}
 	
 	return points;
 }
 
-function makePoint(svg, position, scale, table){
+function makePoint(svg, position, scale, table, segment){
 	
 	var xs = scales.x;
-	var ys = scales.y
+	var ys = scales.y;
 	
 	return svg.append('circle')
 		.style('fill', 'blue')
@@ -315,6 +356,7 @@ function makePoint(svg, position, scale, table){
 		.attr('r', config.pointRadius)
 		.attr('quantity', position.x)
 		.attr('price', position.y)
+		.attr('segment', segment)
 		.attr('cx', xs(position.x))
 		.attr('cy', ys(position.y))
 		.on('mousedown', pointMousedown);
@@ -342,7 +384,6 @@ function makePoint(svg, position, scale, table){
 				}
 				
 			}
-			//TODO FIXME BUG ALERT
 			selectPoint(point, pointIndex());
 			
 			if(points[0].length == 1){
@@ -384,14 +425,26 @@ function selectedPoints(){
 	return d3.selectAll('.selected');
 }
 
+function setSlope(slope){
+	//Line passes through 50,50 endpoints are (10, y) and (x, 10)
+	
+	var y = slope * (10-50) + 50;
+	var x = (10-50) / slope + 50;
+	
+	var points = [{x:10, y:y}, {x:x, y:10}];
+	config.lineEndpoints = points;
+	
+}
+
+var table, line, lineLabel, points, svg;
 
 function main(){
 	var visual = d3.select('#visual');
 	visual.style('width', config.width);
 	
-	var table = makeTable(visual);
-	
-	var svg = makeSVG(visual);
+	table = makeTable(visual);
+	var slider = makeSlider(visual);
+	svg = makeSVG(visual);
 	
 	var defs = makeDefs(svg);
 	var arrow = makeArrow(defs);
@@ -399,11 +452,28 @@ function main(){
 	var axes = makeAxes(svg, scales);
 	var axesLabels = makeAxesLabels(svg);
 	
-	var line = makeLine(svg, scales);
-	var lineLabel = makeLineLabel(svg, line);
-	
-	var points = makePoints(svg, scales, table);
-	
+	drawLine();
 }
+	
+function drawLine(){
+
+	line = makeLine(svg, scales);
+	lineLabel = makeLineLabel(svg, line);
+
+	points = makePoints(svg, scales, table);
+
+}
+
+function redrawLine(){
+
+	clearTable(table);
+	line.remove();
+	lineLabel.remove();
+	points.remove();
+
+	drawLine();
+
+}
+
 
 window.onload = main;
