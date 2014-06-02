@@ -439,20 +439,20 @@ function setSlope(slope){
 var table, line, lineLabel, points, svg;
 
 function main(){
-	var visual = d3.select('#visual');
-	visual.style('width', config.width);
-	
-	table = makeTable(visual);
-	var slider = makeSlider(visual);
-	svg = makeSVG(visual);
-	
-	var defs = makeDefs(svg);
-	var arrow = makeArrow(defs);
-	
-	var axes = makeAxes(svg, scales);
-	var axesLabels = makeAxesLabels(svg);
-	
-	drawLine();
+    var visual = d3.select('#visual');
+    visual.style('width', config.width);
+    
+    var slider = makeSlider(visual);
+    svg = makeSVG(visual);
+    
+    var defs = makeDefs(svg);
+    var arrow = makeArrow(defs);
+    
+    var axes = makeAxes(svg, scales);
+    var axesLabels = makeAxesLabels(svg);
+    
+    table = makeTable(visual);
+    drawLine();
 }
 	
 function drawLine(){
