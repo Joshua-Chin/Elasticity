@@ -60,10 +60,10 @@ function clearTable(table){
 
 function defaultSlopeEntry(){
 
-	var x1 = config.lineEndpoints[0].x.toPrecision(2);
-	var x2 = config.lineEndpoints[1].x.toPrecision(2);
-	var y1 = config.lineEndpoints[0].y.toPrecision(2);
-	var y2 = config.lineEndpoints[1].y.toPrecision(2);
+	var x1 = config.lineEndpoints[0].x.toFixed(0);
+	var x2 = config.lineEndpoints[1].x.toFixed(0);
+	var y1 = config.lineEndpoints[0].y.toFixed(0);
+	var y2 = config.lineEndpoints[1].y.toFixed(0);
 
 	return '${' + x2 + '-' + x1 + '\\over' + y2 + '-' + y1 + '}=' + slope().toFixed(2) + '$';
 }
@@ -134,10 +134,10 @@ function elasticityPoint(x0, y0, x1, y1){
 
 	var e = Math.abs(((dx/x0)/(dy/y0))).toPrecision(4);
 	
-	x0 = x0.toPrecision(2);
-	x1 = x1.toPrecision(2);
-	y0 = y0.toPrecision(2);
-	y1 = y1.toPrecision(2);
+	x0 = x0.toFixed(0);
+	x1 = x1.toFixed(0);
+	y0 = y0.toFixed(0);
+	y1 = y1.toFixed(0);
 	
 	return "$ \\left | {{("+x1+"-"+x0+")/"+x0+"}\\over{("+y1+"-"+y0+")/"+y0+"}} \\right | ="+e+"$";
 	
@@ -150,10 +150,10 @@ function elasticityMidarc(x0, y0, x1, y1){
 
 	var e = Math.abs((dx/(x0+x1))/(dy/(y0+y1))).toPrecision(4);
 	
-	x0 = x0.toPrecision(2);
-	x1 = x1.toPrecision(2);
-	y0 = y0.toPrecision(2);
-	y1 = y1.toPrecision(2);
+	x0 = x0.toFixed(0);
+	x1 = x1.toFixed(0);
+	y0 = y0.toFixed(0);
+	y1 = y1.toFixed(0);
 	
 	return 	"$ \\left| {{(" + x1 + "-" + x0 + ")"
 		+"/(" + x1 + '+' + x0 + ")"
