@@ -3,8 +3,8 @@ var config = {
 	
 	height:300, width:480,
 	margin : {top:40, bottom:40, left:40, right:40},
-	maxPrice : 200,
-	maxQuantity : 200,
+	maxPrice : 150,
+	maxQuantity : 150,
 	lineEndpoints : [{x:10,y:90}, {x:90,y:10}],
 	lineID: "LineID",
 	tableValueID: "TableID",
