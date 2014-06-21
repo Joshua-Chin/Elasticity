@@ -19,8 +19,9 @@ var config = {
 		"$Slope$",
 		"$E_d(Point)$",
 		"$E_d(Midpoint/Arc)$"		     
-	]
-	
+	],
+	precision : 7,
+	pointFixed : 2
 };
 
 function makeTable(elem){
@@ -60,12 +61,13 @@ function clearTable(table){
 
 function defaultSlopeEntry(){
 
-	var x1 = config.lineEndpoints[0].x.toFixed(0);
-	var x2 = config.lineEndpoints[1].x.toFixed(0);
-	var y1 = config.lineEndpoints[0].y.toFixed(0);
-	var y2 = config.lineEndpoints[1].y.toFixed(0);
+	var x1 = config.lineEndpoints[0].x.toFixed(config.pointFixed);
+	var x2 = config.lineEndpoints[1].x.toFixed(config.pointFixed);
+	var y1 = config.lineEndpoints[0].y.toFixed(config.pointFixed);
+	var y2 = config.lineEndpoints[1].y.toFixed(config.pointFixed);
+	console.log(x1);
 
-	return '${' + x2 + '-' + x1 + '\\over' + y2 + '-' + y1 + '}=' + slope().toFixed(2) + '$';
+	return '${' + x2 + '-' + x1 + '\\over' + y2 + '-' + y1 + '}=' + slope().toFixed(config.pointFixed) + '$';
 }
 
 function updateTable(values){
@@ -122,7 +124,7 @@ function computeTableValues(svg, scales, table){
 	]);
 	
 	function d(expr){
-		return '$'+expr.toPrecision(2)+'$';
+		return '$'+expr.toFixed(config.pointFixed)+'$';
 	}
 	
 }
@@ -132,12 +134,12 @@ function elasticityPoint(x0, y0, x1, y1){
 	var dx = x1-x0;
 	var dy = y1-y0;
 
-	var e = Math.abs(((dx/x0)/(dy/y0))).toPrecision(4);
+	var e = Math.abs(((dx/x0)/(dy/y0))).toPrecision(config.precision);
 	
-	x0 = x0.toFixed(0);
-	x1 = x1.toFixed(0);
-	y0 = y0.toFixed(0);
-	y1 = y1.toFixed(0);
+	x0 = x0.toFixed(config.pointFixed);
+	x1 = x1.toFixed(config.pointFixed);
+	y0 = y0.toFixed(config.pointFixed);
+	y1 = y1.toFixed(config.pointFixed);
 	
 	return "$ \\left | {{("+x1+"-"+x0+")/"+x0+"}\\over{("+y1+"-"+y0+")/"+y0+"}} \\right | ="+e+"$";
 	
@@ -148,12 +150,12 @@ function elasticityMidarc(x0, y0, x1, y1){
 	var dx = x1-x0;
 	var dy = y1-y0;
 
-	var e = Math.abs((dx/(x0+x1))/(dy/(y0+y1))).toPrecision(4);
+	var e = Math.abs((dx/(x0+x1))/(dy/(y0+y1))).toPrecision(config.precision);
 	
-	x0 = x0.toFixed(0);
-	x1 = x1.toFixed(0);
-	y0 = y0.toFixed(0);
-	y1 = y1.toFixed(0);
+	x0 = x0.toFixed(config.pointFixed);
+	x1 = x1.toFixed(config.pointFixed);
+	y0 = y0.toFixed(config.pointFixed);
+	y1 = y1.toFixed(config.pointFixed);
 	
 	return 	"$ \\left| {{(" + x1 + "-" + x0 + ")"
 		+"/(" + x1 + '+' + x0 + ")"
@@ -185,7 +187,7 @@ function makeSlider(elem){
 	div
 		.append('label')
 		.attr('for', 'slider')
-		.text('Slope [0.5 to 2.0]');
+		.text('Slope [-0.5 to -2.0]');
 		
 	div
 		.append('input')
@@ -251,10 +253,12 @@ function makeAxes(svg, scales){
 	
 	var xAxis = d3.svg.axis()
 		.scale(scales.x)
+		.ticks(config.maxQuantity/10)
 		.orient('bottom');
 	
 	var yAxis = d3.svg.axis()
 	    .scale(scales.y)
+	    .ticks(config.maxPrice/10)
 	    .orient("left");
 		
 	var svgX = svg.append("g")
